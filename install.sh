@@ -1,6 +1,6 @@
 #!/bin/bash
 
-get_current_ip() {
+function get_current_ip() {
     local current_ip
     current_ip=$(curl -s https://api.ipify.org)
     echo "$current_ip"
@@ -64,12 +64,15 @@ install_tunnel() {
     fi
 
     echo "#! /bin/bash" > /etc/rc.local
+
     for command in "${commands[@]}"; do
         echo "$command" >> /etc/rc.local
     done
+
     echo "exit 0" >> /etc/rc.local
 
     chmod +x /etc/rc.local
+
     echo -e "\033[92mSuccessful\033[0m"
 }
 
@@ -101,105 +104,148 @@ install_reverse_script() {
     bash <(curl -fsSL https://raw.githubusercontent.com/Ptechgithub/ReverseTlsTunnel/main/RtTunnel.sh)
 }
 
-install_privateIP_script(){
-    bash <(curl -Ls https://raw.githubusercontent.com/Azumi67/PrivateIP_TCP-UDP_Tunnel/main/Private.sh --ipv4)
+install_ispblocker_script() {
+    bash <(curl -s https://raw.githubusercontent.com/Kiya6955/IR-ISP-Blocker/main/ir-isp-blocker.sh)
 }
 
-install_rathole_tunnel(){
-    bash <(curl -Ls https://raw.githubusercontent.com/Musixal/rathole-tunnel/main/rathole.sh)
-}
-
-main() {
+main_menu() {
     clear
     echo -e "\033[94mTunnel System Installer/Uninstaller\033[0m"
     echo -e "\033[93m-----------------------------------------\033[0m"
-    read -p $'\033[93mDo you want to:\n\033[92m1. Install\033[0m\n\033[91m2. Uninstall\033[0m\n\033[94m3. Install Sanaie Script\033[0m\n\033[34m4. Install Alireza Script\033[0m\n\033[32m5. Install Ghost Script\033[0m\n\033[36m6. Install PFTUN Script\033[0m\n\033[35m7. Install Reverse Script\033[0m\n\033[33m8. Install PrivateIP Script\033[0m\n\033[96m9. Install Rathole Tunnel\033[0m\nEnter the number of your choice: ' choice
+    read -p $'\033[93mWhat would you like to do?\n\033[92m1. Install\n\033[91m2. Uninstall\n\033[94m3. Scripts\n\033[0mEnter the number of your choice: ' choice
 
-    if [[ $choice != "1" && $choice != "2" && $choice != "3" && $choice != "4" && $choice != "5" && $choice != "6" && $choice != "7" && $choice != "8" && $choice != "9" ]]; then
-        echo -e "\033[91mInvalid action. Please enter '1', '2', '3', '4', '5', '6', '7', '8', or '9'.\033[0m"
+    if [[ $choice != "1" && $choice != "2" && $choice != "3" ]]; then
+        echo -e "\033[91mInvalid action. Please enter '1', '2', or '3'.\033[0m"
         return
     fi
 
     if [[ $choice == "1" ]]; then
-        clear
-        echo -e "\033[93mSelect your tunnel type:\n\033[92m1. 6to4\033[0m\n\033[91m2. iptables\033[0m\nEnter the number of your tunnel type: "
-        read -r tunnel_type
-
-        if [[ $tunnel_type != "1" && $tunnel_type != "2" ]]; then
-            echo -e "\033[91mInvalid tunnel type. Please enter '1' or '2'.\033[0m"
-            return
-        fi
-
-        if [[ $tunnel_type == "1" ]]; then
-            tunnel_type="6to4"
-        elif [[ $tunnel_type == "2" ]]; then
-            tunnel_type="iptables"
-        fi
-
-        echo -e "\033[93mSelect your server type:\n\033[92m1. Iran\033[0m\n\033[91m2. Foreign\033[0m\nEnter the number of your server type: "
-        read -r server_type
-
-        if [[ $server_type != "1" && $server_type != "2" ]]; then
-            echo -e "\033[91mInvalid server type. Please enter '1' or '2'.\033[0m"
-            return
-        fi
-
-        if [[ $server_type == "1" ]]; then
-            server_type="iran"
-            iran_ip=$(get_current_ip)
-            clear
-            echo -e "\033[93mIran server IP address: $iran_ip\033[0m"
-            read -p $'\033[93mEnter Foreign server IP address: \033[0m' foreign_ip
-
-        elif [[ $server_type == "2" ]]; then
-            server_type="foreign"
-            foreign_ip=$(get_current_ip)
-            clear
-            echo -e "\033[93mForeign server IP address: $foreign_ip\033[0m"
-            read -p $'\033[93mEnter Iran server IP address: \033[0m' iran_ip
-        fi
-
-        install_tunnel "$iran_ip" "$foreign_ip" "$server_type" "$tunnel_type"
-
+        install_menu
     elif [[ $choice == "2" ]]; then
-        clear
-        echo -e "\033[93mSelect your server type:\n\033[92m1. Iran\033[0m\n\033[91m2. Foreign\033[0m\nEnter the number of your server type: "
-        read -r server_type
-
-        if [[ $server_type != "1" && $server_type != "2" ]]; then
-            echo -e "\033[91mInvalid server type. Please enter '1' or '2'.\033[0m"
-            return
-        fi
-
-        if [[ $server_type == "1" ]]; then
-            server_type="iran"
-        elif [[ $server_type == "2" ]]; then
-            server_type="foreign"
-        fi
-
-        uninstall_tunnel "$server_type"
-
+        uninstall_menu
     elif [[ $choice == "3" ]]; then
-        install_sanaie_script
-
-    elif [[ $choice == "4" ]]; then
-        install_alireza_script
-    
-    elif [[ $choice == "5" ]]; then
-        install_ghost_script
-
-    elif [[ $choice == "6" ]]; then
-        install_pftun_script
-
-    elif [[ $choice == "7" ]]; then
-        install_reverse_script
-
-    elif [[ $choice == "8" ]]; then
-        install_privateIP_script
-
-    elif [[ $choice == "9" ]]; then
-        install_rathole_tunnel
+        scripts_menu
     fi
 }
 
-main
+install_menu() {
+    clear
+    echo -e "\033[94mInstall Menu\033[0m"
+    echo -e "\033[93m-----------------------------------------\033[0m"
+    echo -e "\033[92m1. 6to4\033[0m"
+    echo -e "\033[91m2. iptables\033[0m"
+    echo -e "\033[90m6. Back\033[0m"
+    read -r tunnel_type
+
+    if [[ $tunnel_type != "1" && $tunnel_type != "2" && $tunnel_type != "3" ]]; then
+        echo -e "\033[91mInvalid tunnel type. Please enter '1', '2', or '3'.\033[0m"
+        return
+    fi
+
+    if [[ $tunnel_type == "1" ]]; then
+        tunnel_type="6to4"
+    elif [[ $tunnel_type == "2" ]]; then
+        tunnel_type="iptables"
+    elif [[ $tunnel_type == "3" ]]; then
+        main_menu
+        return
+    fi
+
+    echo -e "\033[93mSelect your server type:\n\033[92m1. Iran\033[0m\n\033[91m2. Foreign\033[0m\n\033[91m3. Back\033[0m\nEnter the number of your server type: "
+    read -r server_type
+
+    if [[ $server_type != "1" && $server_type != "2" && $server_type != "3" ]]; then
+        echo -e "\033[91mInvalid server type. Please enter '1', '2', or '3'.\033[0m"
+        return
+    fi
+
+    if [[ $server_type == "1" ]]; then
+        server_type="iran"
+        iran_ip=$(get_current_ip)
+        echo -e "\033[93mIran server IP address: $iran_ip\033[0m"
+        read -p $'\033[93mEnter Foreign server IP address: \033[0m' foreign_ip
+    elif [[ $server_type == "2" ]]; then
+        server_type="foreign"
+        foreign_ip=$(get_current_ip)
+        echo -e "\033[93mForeign server IP address: $foreign_ip\033[0m"
+        read -p $'\033[93mEnter Iran server IP address: \033[0m' iran_ip
+    elif [[ $server_type == "3" ]]; then
+        install_menu
+        return
+    fi
+
+    install_tunnel "$iran_ip" "$foreign_ip" "$server_type" "$tunnel_type"
+    main_menu
+}
+
+uninstall_menu() {
+    clear
+    echo -e "\033[94mUninstall Menu\033[0m"
+    echo -e "\033[93m-----------------------------------------\033[0m"
+    echo -e "\033[92m1. Iran\033[0m"
+    echo -e "\033[91m2. Foreign\033[0m"
+    echo -e "\033[91m3. Back\033[0m"
+    read -r server_type
+
+    if [[ $server_type != "1" && $server_type != "2" && $server_type != "3" ]]; then
+        echo -e "\033[91mInvalid server type. Please enter '1', '2', or '3'.\033[0m"
+        return
+    fi
+
+    if [[ $server_type == "1" ]]; then
+        server_type="iran"
+    elif [[ $server_type == "2" ]]; then
+        server_type="foreign"
+    elif [[ $server_type == "3" ]]; then
+        main_menu
+        return
+    fi
+
+    uninstall_tunnel "$server_type"
+    main_menu
+}
+
+scripts_menu() {
+    clear
+    echo -e "\033[94mScripts Menu\033[0m"
+    echo -e "\033[93m-----------------------------------------\033[0m"
+    echo -e "\033[92m1. Install Sanaie Script\033[0m"
+    echo -e "\033[34m2. Install Alireza Script\033[0m"
+    echo -e "\033[36m3. Install Ghost Script\033[0m"
+    echo -e "\033[33m4. Install PFTUN Script\033[0m"
+    echo -e "\033[35m5. Install Reverse Script\033[0m"
+    echo -e "\033[34m6. Install IR-ISPBLOCKER Script\033[0m"
+    echo -e "\033[91m6. Back\033[0m"
+
+    read -p $'\033[93mEnter the number of your choice: \033[0m' script_choice
+
+    case $script_choice in
+        1)
+            install_sanaie_script
+            ;;
+        2)
+            install_alireza_script
+            ;;
+        3)
+            install_ghost_script
+            ;;
+        4)
+            install_pftun_script
+            ;;
+        5)
+            install_reverse_script
+            ;;
+        6)
+            install_ispblocker_script
+            ;;
+        7)
+            main_menu
+            ;;    
+        *)
+            echo -e "\033[91mInvalid choice. Please enter a number from 1 to 6.\033[0m"
+            ;;
+    esac
+    main_menu
+}
+
+main_menu
